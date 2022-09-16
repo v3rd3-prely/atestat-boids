@@ -1,4 +1,5 @@
 ext
 obj
 .vscode
-bin\main.exe
+
+bin/main.exe

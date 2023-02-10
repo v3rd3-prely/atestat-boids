@@ -22,7 +22,7 @@ Slider::Slider(int x, int y, const char* n)
 	axis.setOrigin(0, 1);
 	axis.setSize(sf::Vector2f(width, 2));
 
-	font.loadFromFile("fonts/arial.ttf");
+	font.loadFromFile("../fonts/arial.ttf");
 	text.setFont(font);
 	text.setString(std::to_string(int(value)));
 	text.setPosition(pos);

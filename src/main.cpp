@@ -32,7 +32,7 @@ int main()
 	Clock cooldown;
 	Font infoFont;
 	Text infoText;
-	infoFont.loadFromFile("fonts/arial.ttf");
+	infoFont.loadFromFile("../fonts/arial.ttf");
 	infoText.setFont(infoFont);
 	infoText.setOutlineColor(Color(0, 0, 0));
 	infoText.setOutlineThickness(4);

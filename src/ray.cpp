@@ -33,23 +33,28 @@ sf::Vector2f Ray::collide(Wall *walls, unsigned int s)
 		Wall &w = walls[i];
 		if(w.a == a || (vertical && w.vertical))
 			continue;
+
+		
 		if(vertical)
 		{
 			p.x = p1.x;
 			p.y = w.a*p.x+w.b;
 		}
-		if(w.vertical)
+		else if(w.vertical)
 		{
 			p.x = w.p1.x;
 			p.y = a*p.x+b;
 		}
-		if(!vertical && !w.vertical)
+		else
 		{
 			p.x = (w.b-b)/(a-w.a);
 			p.y = a*p.x+b;
 		}
-		if(abs(p.x-p1.x)+abs(p.x-p2.x) <= abs(p1.x-p2.x) && abs(p.x-w.p1.x)+abs(p.x-w.p2.x) <= abs(w.p1.x-w.p2.x) &&
-		abs(p.y-p1.y)+abs(p.y-p2.y) <= abs(p1.y-p2.y) && abs(p.y-w.p1.y)+abs(p.y-w.p2.y) <= abs(w.p1.y-w.p2.y))
+		
+		bool isInsideRay = abs(p.x-p1.x)+abs(p.x-p2.x) <= abs(p1.x-p2.x) && abs(p.y-p1.y)+abs(p.y-p2.y) <= abs(p1.y-p2.y);
+		bool isInsideWall = abs(p.x-w.p1.x)+abs(p.x-w.p2.x) <= abs(w.p1.x-w.p2.x) && abs(p.y-w.p1.y)+abs(p.y-w.p2.y) <= abs(w.p1.y-w.p2.y);
+
+		if(isInsideRay && isInsideWall)
 		{
 			res = (dist(p1, res) > dist(p1, p)) ? p : res;
 		}

@@ -7,6 +7,7 @@
 #include "ray.hpp"
 #include "slider.hpp"
 #include "rest.hpp"
+#include "info.hpp"
 
 using namespace sf;
 
@@ -16,6 +17,7 @@ int main()
 	bool isPaused = true, showRays = true;
 	float deltaT = 0;
 	
+	Info info;
 	RenderWindow window(VideoMode(1024, 576), "Boids", Style::Fullscreen);
 	Boid boids[N_MAX];
 	Wall walls[A_MAX];
@@ -27,17 +29,6 @@ int main()
 	ali( 10, window.getSize().y-150, "Alignement"),
 	per(350, window.getSize().y-150, "Perception");
 
-	bool infoToggle = false;
-	bool tabPressed;
-	Clock cooldown;
-	Font infoFont;
-	Text infoText;
-	infoFont.loadFromFile("../fonts/arial.ttf");
-	infoText.setFont(infoFont);
-	infoText.setOutlineColor(Color(0, 0, 0));
-	infoText.setOutlineThickness(4);
-	infoText.setString(" Press Space to pause\n Press S to show rays\n Press N to reset boids\n Press Esc to exit");
-	infoText.setPosition(0, 0);
 
 
 	srand(time(NULL));
@@ -70,24 +61,13 @@ int main()
 			wall.show(window);
 		}
 		
+		info.update();
+		info.show(window);
+
 		sep.show(window);
 		coh.show(window);
 		ali.show(window);
 		per.show(window);
-		
-		if(infoToggle)
-			window.draw(infoText);
-		if(Keyboard::isKeyPressed(Keyboard::Tab))
-		{
-			tabPressed = true;
-		}
-		if(cooldown.getElapsedTime().asMilliseconds() > 50)
-		{
-			infoToggle = tabPressed;
-			
-			tabPressed = false;
-			cooldown.restart();
-		}
 	};
 
 	// RESET EVERYTHING

@@ -51,8 +51,8 @@ sf::Vector2f Ray::collide(Wall *walls, unsigned int s)
 			p.y = a*p.x+b;
 		}
 
-		bool isInsideRay = dist(p, p1)+dist(p, p2) <= dist(p1, p2);
-		bool isInsideWall = dist(p, w.p1)+dist(p, w.p2) <= dist(w.p1, w.p2);
+		bool isInsideRay = (abs(p.x-p1.x)+abs(p.x-p2.x))<= abs(p1.x-p2.x)+0.01;
+		bool isInsideWall = (abs(p.x-w.p1.x)+abs(p.x-w.p2.x)) <= abs(w.p1.x-w.p2.x)+0.01;
 		// bool isInsideRay = abs(p.x-p1.x)+abs(p.x-p2.x) <= abs(p1.x-p2.x) && abs(p.y-p1.y)+abs(p.y-p2.y) <= abs(p1.y-p2.y);
 		// bool isInsideWall = abs(p.x-w.p1.x)+abs(p.x-w.p2.x) <= abs(w.p1.x-w.p2.x) && abs(p.y-w.p1.y)+abs(p.y-w.p2.y) <= abs(w.p1.y-w.p2.y);
 

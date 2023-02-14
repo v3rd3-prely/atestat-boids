@@ -1,74 +1,107 @@
 #include "slider.hpp"
 #include <string>
+#include <iostream>
+#include <cmath>
 
-Slider::Slider(int x, int y, const char* n)
+using sf::Mouse;
+using sf::Color;
+
+Slider::Slider()
 {
-	pos.x = x;
-	pos.y = y;
-	minVal = 0;
-	maxVal = 100;
-	value = 0;
-	hold = false;
-	width = 300;
-	
-	name.setString(std::string(n));
-
 	int radius = 15;
-	slider.setPosition(pos);
-	slider.setOrigin(radius, radius);
-	slider.setRadius(radius);
-	slider.setFillColor(sf::Color(200, 255, 100, 100));
-	axis.setPosition(pos);
-	axis.setOrigin(0, 1);
-	axis.setSize(sf::Vector2f(width, 2));
+	mIndicator.setOrigin(radius, radius);
+	mIndicator.setRadius(radius);
+	mIndicator.setFillColor(Color(100, 200, 100, 255));
+	mIndicator.setOutlineColor(Color(0, 0, 0, 100));
+	mIndicator.setOutlineThickness(6);
 
-	font.loadFromFile("../fonts/arial.ttf");
-	text.setFont(font);
-	text.setString(std::to_string(int(value)));
-	text.setPosition(pos);
-	name.setFont(font);
-	name.setPosition(pos.x, pos.y-50);
-	name.setOutlineColor(sf::Color(0, 0, 0));
-	name.setOutlineThickness(3);
+	mTrack.setPoints(sf::Vector2f(0, 0), sf::Vector2f(mWidth, 0));
+	mTrack.roundEdges(3, 5);
+	mTrack.mShape.setFillColor(Color(255, 255, 255, 150));
+	mTrack.mShape.setOutlineColor(Color(0, 0, 0, 100));
+	mTrack.mShape.setOutlineThickness(4);
 
+	mText.setString(std::to_string(int(mValue)));
+	mText.setOutlineColor(Color(0, 0, 0));
+	mText.setOutlineThickness(3);
+
+	mTitle.setOutlineColor(Color(0, 0, 0));
+	mTitle.setOutlineThickness(3);
 }
 
-void Slider::setValues(int mi, int ma)
+Slider::Slider(int x, int y, const char* name)
 {
-	minVal = mi;
-	maxVal = ma;
+	Slider();
+	setPosition(x, y);
+	setName(name);
 }
 
-void Slider::check(sf::RenderWindow &window)
+void Slider::setValues(int minimum, int maximum)
 {
-	if(!hold)
-	{
-
-		hold = slider.getGlobalBounds().contains(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y);
-		hold *= sf::Mouse::isButtonPressed(sf::Mouse::Left);
-	}
-	else
-		hold = sf::Mouse::isButtonPressed(sf::Mouse::Left);
-
-	if(hold)
-	{
-		int x = sf::Mouse::getPosition(window).x;
-		slider.setPosition(std::max(std::min(x, int(pos.x+width)), int(pos.x)), pos.y);
-		value = (minVal + ((slider.getPosition().x - pos.x) / width * (maxVal - minVal)));
-		text.setString(std::to_string(int(value)));
-	}
+	mMinValue = minimum;
+	mMaxValue = maximum;
 }
 
-void Slider::setName(const char* n)
+void limit(int& value, int mi, int ma)
 {
-	name.setString(std::string(n));
+	value = std::max(std::min(value, ma), mi);
 }
 
-void Slider::show(sf::RenderWindow &window)
+// linear interpolation
+int lerp(int value, int minIn, int maxIn, int minOut, int maxOut)
 {
-	window.draw(slider);
-	window.draw(axis);
-	window.draw(text);
-	window.draw(name);
+	return ((value-minIn)*(maxOut-minOut)/(maxIn-minIn) + minOut);
 }
 
+void Slider::check()
+{
+	bool isMousePressed = Mouse::isButtonPressed(Mouse::Left);
+	bool isMouseInside = mIndicator.getGlobalBounds().contains(Mouse::getPosition(*mWindow).x, Mouse::getPosition(*mWindow).y);
+
+	isMouseInside = isMouseInside || isHolded;
+
+	isHolded = isMousePressed && isMouseInside;
+
+	if(!isHolded)
+		return;
+	
+	int mouseX = Mouse::getPosition(*mWindow).x;
+	auto position = mTrack.mShape.getPosition();
+	limit(mouseX, position.x, position.x+mWidth);
+	mValue = lerp(mouseX, position.x, position.x+mWidth, mMinValue, mMaxValue);
+
+	mIndicator.setPosition(mouseX, position.y);
+	mText.setString(std::to_string(int(mValue)));
+}
+
+void Slider::setName(const char* name)
+{
+	mTitle.setString(std::string(name));
+}
+
+float Slider::getValue()
+{
+	return mValue;
+}
+
+void Slider::show()
+{	
+	mWindow->draw(mTrack.mShape);
+	mWindow->draw(mIndicator);
+	mWindow->draw(mText);
+	mWindow->draw(mTitle);	
+}
+
+void Slider::setFont(sf::Font& font)
+{
+	mText.setFont(font);
+	mTitle.setFont(font);
+}
+
+void Slider::setPosition(float x, float y)
+{
+	mIndicator.setPosition(x, y);
+	mTrack.mShape.setPosition(x, y);
+	mText.setPosition(x+mWidth-60, y-60.f);
+	mTitle.setPosition(x, y-60.f);
+}

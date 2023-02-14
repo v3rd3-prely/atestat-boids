@@ -2,17 +2,15 @@
 #include <SFML/System.hpp>
 #include <SFML/Graphics.hpp>
 #include "wall.hpp"
+#include "segment.hpp"
 
 
-class Ray
+class Ray : public Segment
 {
 public:
-	sf::Vector2f p1, p2;
-	sf::ConvexShape shape;
-	float a, b;
-	bool vertical;
 
 	Ray();
-	void set(sf::Vector2f po1, sf::Vector2f po2);
-	sf::Vector2f collide(Wall *walls, unsigned int s);
+	void set(sf::Vector2f point1, sf::Vector2f point2);
+	sf::Vector2f collide(Wall* walls);
+	void setPoints(sf::Vector2f point1, sf::Vector2f point2);
 };

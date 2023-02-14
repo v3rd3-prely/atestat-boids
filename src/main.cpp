@@ -1,8 +1,9 @@
 #include <SFML/Graphics.hpp>
 #include <ctime>
-#include <string>
 #include <cmath>
 #include <iostream>
+#include <string>
+#include <array>
 
 #include "fps.hpp"
 #include "boid.hpp"
@@ -10,7 +11,6 @@
 #include "slider.hpp"
 #include "rest.hpp"
 #include "info.hpp"
-#include "showable.hpp"
 
 using namespace sf;
 
@@ -23,8 +23,11 @@ int main()
 	
 	Info info;
 	RenderWindow window;
-	Boid boids[N_MAX];
-	Wall walls[A_MAX];
+
+	std::array <Boid, N_MAX> boids;
+	std::array <Wall, A_MAX> walls;
+	// Boid boids[N_MAX];
+	// Wall walls[A_MAX];
 	Event event;
 	FPS timer;
 	Font arial;
@@ -33,6 +36,7 @@ int main()
 	// SETUP
 
 	srand(time(NULL));
+	// system("pwd");
 	arial.loadFromFile("../fonts/arial.ttf");
 	window.create(VideoMode::getDesktopMode(), "Boids", Style::Fullscreen);
 	window.setFramerateLimit(120);
@@ -101,8 +105,9 @@ int main()
 			if(isPaused)
 				continue;
 
-			boid.avoid(walls);
-			boid.flock(boids, parameters);
+			boid.avoid(walls.data());
+			boid.flock(boids.data(), parameters);
+			// boid.flock(boids, parameters);
 			boid.update(timer.getDeltaT());
 			boid.wrap();
 		}

@@ -1,15 +1,15 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-
-class Info
+#include "showable.hpp"
+class Info : public Showable
 {
-	sf::Clock cooldown;
-	sf::Font font;
-	sf::Text text;
-	bool toggle, pressed;
+	sf::Text mText;
+	bool isVisible = false, isPressed = false;
 public:
 	Info();
 	void update();
-	void show(sf::RenderWindow &window);
+	void show();
+	void setFont(sf::Font& font);
+	void setText(const char *text);
 };

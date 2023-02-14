@@ -1,16 +1,14 @@
 #pragma once
 #include <SFML/System.hpp>
 #include <SFML/Graphics.hpp>
+#include "showable.hpp"
+#include "segment.hpp"
 
-class Wall
+class Wall : public Showable, public Segment
 {
 public:
-	sf::Vector2f p1, p2;
-	sf::ConvexShape shape;
-	float a, b;
-	bool vertical;
-
-	Wall(sf::Vector2f po1, sf::Vector2f po2);
 	Wall();
-	void show(sf::RenderWindow &window);
+	Wall(sf::Vector2f point1, sf::Vector2f point2);
+	void setPoints(sf::Vector2f point1, sf::Vector2f point2);
+	void show();
 };

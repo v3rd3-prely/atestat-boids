@@ -1,99 +1,156 @@
 #include <SFML/Graphics.hpp>
 #include <ctime>
+#include <string>
+#include <cmath>
+#include <iostream>
 
 #include "fps.hpp"
 #include "boid.hpp"
 #include "wall.hpp"
-#include "ray.hpp"
 #include "slider.hpp"
 #include "rest.hpp"
 #include "info.hpp"
+#include "showable.hpp"
 
 using namespace sf;
 
 int main()
 {
-	float separation, cohesion, alignment, perception;
-	bool isPaused = true, showRays = true;
-	float deltaT = 0;
+	bool isPaused = true, shouldShowRays = true, shouldShowSliders = true;
+	float parameters[4];
+	float frameSpeed;
+	std::string text, frameString;
 	
 	Info info;
-	RenderWindow window(VideoMode(1024, 576), "Boids", Style::Fullscreen);
+	RenderWindow window;
 	Boid boids[N_MAX];
 	Wall walls[A_MAX];
 	Event event;
 	FPS timer;
-	Slider
-	sep( 10, window.getSize().y- 75, "Separation"),
-	coh(350, window.getSize().y- 75,   "Cohesion"),
-	ali( 10, window.getSize().y-150, "Alignement"),
-	per(350, window.getSize().y-150, "Perception");
+	Font arial;
+	Slider sliders[4];
 
-
+	// SETUP
 
 	srand(time(NULL));
+	arial.loadFromFile("../fonts/arial.ttf");
+	window.create(VideoMode::getDesktopMode(), "Boids", Style::Fullscreen);
 	window.setFramerateLimit(120);
 	window.setVerticalSyncEnabled(true);
+	window.setKeyRepeatEnabled(false);
+
+	info.setWindow(window);
+	info.setFont(arial);
+	text += "Press Space to pause / play\n";
+	text += "Press S to show / hide rays\n";
+	text += "Press E to show / hide sliders and cursor\n";
+	text += "Press N to reset boids and walls\n";
+	text += "Press Esc to exit\n";
+	info.setText(text.c_str());
+
+	int yValue = window.getSize().y- 50;
+	for(int i = 0; i < 4; i++)
+	{
+		sliders[i].setWindow(window);
+		sliders[i].setFont(arial);
+		sliders[i].setPosition(30, yValue-100*i);
+	}
+	sliders[0].setName("Separation");
+	sliders[1].setName(  "Cohesion");
+	sliders[2].setName("Alignement");
+	sliders[3].setName("Perception");
+
+	for(Boid &boid : boids)
+		boid.setWindow(window);
+	for(Wall &wall : walls)
+		wall.setWindow(window);
+
+	// DRAW
+	auto draw = [&]()
+	{
+		if(shouldShowRays)
+			for(Boid &boid : boids)
+				boid.showRays();
+
+		for(Wall &wall : walls)
+			wall.show();
+		
+		for(Boid &boid : boids)
+			boid.show();
+
+		info.show();
+
+		if(shouldShowSliders)
+			for(Slider &slider : sliders)
+				slider.show();
+	};
 
 	// LOOP
 
-	auto loop = [&](){
-		sep.check(window);
-		coh.check(window);
-		ali.check(window);
-		per.check(window);
-
-		separation = sep.value*SEPARATION;
-		cohesion = coh.value*COHESION;
-		alignment = ali.value*ALIGNMENT;
-		perception = per.value*per.value*PERCEPTION;
+	auto loop = [&]()
+	{
+		timer.update();
+		frameSpeed = 1/timer.getDeltaT();
+		info.setText(("FPS: "+std::to_string(frameSpeed).substr(0, 5)+"\n"+text).c_str());
+		info.update();
 
 		for(Boid &boid : boids)
 		{
-			boid.think(boids, separation, cohesion, alignment, perception);
-			boid.avoid(walls, A_MAX);
-			boid.contain(window.getSize().x, window.getSize().y);
-			boid.update(deltaT, perception);
-			boid.show(window, showRays);
+			boid.updateRays(parameters[3]);
+
+			if(isPaused)
+				continue;
+
+			boid.avoid(walls);
+			boid.flock(boids, parameters);
+			boid.update(timer.getDeltaT());
+			boid.wrap();
+		}
+
+		if(!shouldShowSliders)
+			return;
+
+		for(Slider &slider : sliders)
+			slider.check();
+
+		parameters[0] = pow(sliders[0].getValue(), 0.8)*SEPARATION;
+		parameters[1] = sliders[1].getValue()*COHESION;
+		parameters[2] = sliders[2].getValue()*ALIGNMENT;
+		parameters[3] = pow(sliders[3].getValue(), 3)*PERCEPTION;
+	};
+
+	// RESET BOIDS AND WALLS
+
+	auto refresh = [&](){
+		for(Boid &boid : boids)
+		{
+			float range = 100;
+			float margin = 15;
+			float randomX = random(margin, window.getSize().x-margin);
+			float randomY = random(margin, window.getSize().y-margin);
+
+			boid.setPosition(Vector2f(randomX, randomY));
+			boid.setVelocity(Vector2f(random(-range, range), random(-range, range)));
+			boid.update();
 		}
 		for(Wall &wall : walls)
 		{
-			wall.show(window);
-		}
-		
-		info.update();
-		info.show(window);
-
-		sep.show(window);
-		coh.show(window);
-		ali.show(window);
-		per.show(window);
-	};
-
-	// RESET EVERYTHING
-
-	auto reset = [&](){
-		walls[0] = Wall(Vector2f(0, 0), Vector2f(window.getSize().x, 0));
-		walls[1] = Wall(Vector2f(window.getSize().x, 0), Vector2f(window.getSize().x, window.getSize().y));
-		walls[2] = Wall(Vector2f(window.getSize().x, window.getSize().y), Vector2f(0, window.getSize().y));
-		walls[3] = Wall(Vector2f(0, window.getSize().y), Vector2f(0, 0));
-		for(int i = 4; i < A_MAX; i++)
-		{
 			float rx1 = random(0, window.getSize().x);
 			float ry1 = random(0, window.getSize().y);
-			float rx2 = random(-400, 400);
-			float ry2 = random(-400, 400);
-			walls[i] = Wall(Vector2f(rx1, ry1), Vector2f(rx1+rx2, ry1+ry2));
+			float rx2 = random(-500, 500);
+			float ry2 = random(-500, 500);
+			wall.setPoints(Vector2f(rx1, ry1), Vector2f(rx1+rx2, ry1+ry2));
 		}
-
-		for(Boid &boid : boids)
-		{
-			boid.pos = Vector2f(random(0, window.getSize().x), random(0, window.getSize().y));
-			boid.speed = Vector2f(random(-500, 500), random(-500, 500));
-		}
+		if(!BORDER)
+			return;
+		
+		walls[0].setPoints(Vector2f(0, 0), Vector2f(window.getSize().x, 0));
+		walls[1].setPoints(Vector2f(window.getSize().x, 0), Vector2f(window.getSize().x, window.getSize().y));
+		walls[2].setPoints(Vector2f(window.getSize().x, window.getSize().y), Vector2f(0, window.getSize().y));
+		walls[3].setPoints(Vector2f(0, window.getSize().y), Vector2f(0, 0));
 	};
 
-	// EVENTS
+	// QUERRY EVENTS
 
 	auto events = [&](){
 		while (window.pollEvent(event))
@@ -113,10 +170,14 @@ int main()
 					isPaused = !isPaused;
 					break;
 				case Keyboard::S:
-					showRays = !showRays;
+					shouldShowRays = !shouldShowRays;
+					break;
+				case Keyboard::E:
+					shouldShowSliders = !shouldShowSliders;
+					window.setMouseCursorVisible(shouldShowSliders);
 					break;
 				case Keyboard::N:
-					reset();
+					refresh();
 					break;
 				}
 				break;
@@ -124,12 +185,11 @@ int main()
 		}
 	};
 
-	reset();
+	refresh();
 	while (window.isOpen())
 	{
-		window.clear();
-		timer.update();
-		deltaT = timer.getDeltaT()*!isPaused;
+		window.clear(sf::Color(50, 50, 50));
+		draw();
 		loop();
 		events();
 		window.display();

@@ -2,30 +2,36 @@
 
 Info::Info()
 {
-	font.loadFromFile("../fonts/arial.ttf");
-	text.setFont(font);
-	text.setOutlineColor(sf::Color(0, 0, 0));
-	text.setOutlineThickness(4);
-	text.setString(" Press Space to pause\n Press S to show rays\n Press N to reset boids\n Press Esc to exit");
-	text.setPosition(0, 0);
+	mText.setOutlineColor(sf::Color(0, 0, 0));
+	mText.setOutlineThickness(3);
+	mText.setPosition(20, 10);
+	mText.setStyle(sf::Text::Bold);
+	mText.setString("");
 }
 
-void Info::show(sf::RenderWindow &window)
+void Info::setText(const char *text)
 {
-	if(toggle)
-		window.draw(text);
+	mText.setString(text);
+}
+
+void Info::show()
+{
+	if(!isVisible)
+		return;
+	mWindow->draw(mText);
 }
 
 void Info::update()
 {
 	if(sf::Keyboard::isKeyPressed(sf::Keyboard::Tab))
-		{
-			pressed = true;
-		}
-		if(cooldown.getElapsedTime().asMilliseconds() > 50)
-		{
-			toggle = pressed;
-			pressed = false;
-			cooldown.restart();
-		}
+	{
+		isPressed = true;
+	}
+	isVisible = isPressed;
+	isPressed = false;
+}
+
+void Info::setFont(sf::Font& font)
+{
+	mText.setFont(font);
 }

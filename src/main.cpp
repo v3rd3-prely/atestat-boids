@@ -16,7 +16,7 @@ using namespace sf;
 
 int main()
 {
-	bool isPaused = true, shouldShowRays = true, shouldShowSliders = true;
+	bool isPaused = false, shouldShowRays = true, shouldShowSliders = true;
 	float parameters[4];
 	float frameSpeed;
 	std::string text, frameString;
@@ -86,11 +86,14 @@ int main()
 	};
 
 	// LOOP
-
+	float timePassed = 0;
 	auto loop = [&]()
 	{
 		timer.update();
 		frameSpeed = 1/timer.getDeltaT();
+		timePassed += timer.getDeltaT();
+		if(timePassed > 30)
+			window.close();
 		info.setText(("FPS: "+std::to_string(frameSpeed).substr(0, 5)+"\n"+text).c_str());
 		info.update();
 

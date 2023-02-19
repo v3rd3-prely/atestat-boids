@@ -106,7 +106,7 @@ void Boid::avoid(Wall *walls)
 
 void Boid::flock(Boid *boids, float *params)
 {
-	Boid mid;
+	// Boid mid;
 	Vector2f averagePosition(0, 0);
 	Vector2f averageDirection(0, 0);
 	Vector2f distance;

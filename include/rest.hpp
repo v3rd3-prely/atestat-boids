@@ -13,5 +13,5 @@
 #define PERCEPTION 0.0015f
 #define PI 3.14159265359
 
-float dist(sf::Vector2f a, sf::Vector2f b = sf::Vector2f(0, 0));
+float dist(const sf::Vector2f& a, const sf::Vector2f& b = sf::Vector2f(0, 0));
 int random(int const &mi, int const &ma);

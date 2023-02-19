@@ -10,7 +10,7 @@ class Slider : public Showable
 	int mMinValue = 0, mMaxValue = 100, mWidth = 300;
 	bool isHolded = false;
 	sf::Text mText, mTitle;
-	float mValue = 0;
+	float mValue = 100;
 public:
 
 	Slider();

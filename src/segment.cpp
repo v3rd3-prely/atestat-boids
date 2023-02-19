@@ -35,29 +35,52 @@ void Segment::roundEdges(float thickness, int accuracy)
 	}
 }
 
+int orientation(const Vector2f& p, const Vector2f& q, const Vector2f& r)
+{
+	// See https://www.geeksforgeeks.org/orientation-3-ordered-points/
+	// for details of below formula.
+	int val = (q.y - p.y) * (r.x - q.x) -
+				(q.x - p.x) * (r.y - q.y);
+
+	if (val == 0) return 0;  // collinear
+
+	return (val > 0)? 1: 2; // clock or counterclock wise
+}
 
 bool Segment::doesIntersect(Segment &other, Vector2f &intersection)
 {
-	if(other.a == a && isVertical == other.isVertical)
-			return false;
-		
-		if(isVertical)
-		{
-			intersection.x = b;
-			intersection.y = other.a*intersection.x+other.b;
-		}
-		else if(other.isVertical)
-		{
-			intersection.x = other.b;
-			intersection.y = a*intersection.x+b;
-		}
-		else
-		{
-			intersection.x = (other.b-b)/(a-other.a);
-			intersection.y = a*intersection.x+b;
-		}
-
-	bool isInsideThis = (abs(intersection.x-mPoint1.x)+abs(intersection.x-mPoint2.x)) <= abs(mPoint1.x-mPoint2.x)+0.01;
-	bool isInsideOther = (abs(intersection.x-other.mPoint1.x)+abs(intersection.x-other.mPoint2.x)) <= abs(other.mPoint1.x-other.mPoint2.x)+0.01;
-	return isInsideThis && isInsideOther;
+	int o1 = orientation(mPoint1, mPoint2, other.mPoint1);
+	int o2 = orientation(mPoint1, mPoint2, other.mPoint2);
+	int o3 = orientation(other.mPoint1, other.mPoint2, mPoint1);
+	int o4 = orientation(other.mPoint1, other.mPoint2, mPoint2);
+	
+	// General case
+	if (o1 != o2 && o3 != o4)
+		return true;
+	return false;
 }
+// bool Segment::doesIntersect(Segment &other, Vector2f &intersection)
+// {
+// 	if(other.a == a && isVertical == other.isVertical)
+// 			return false;
+		
+// 		if(isVertical)
+// 		{
+// 			intersection.x = b;
+// 			intersection.y = other.a*intersection.x+other.b;
+// 		}
+// 		else if(other.isVertical)
+// 		{
+// 			intersection.x = other.b;
+// 			intersection.y = a*intersection.x+b;
+// 		}
+// 		else
+// 		{
+// 			intersection.x = (other.b-b)/(a-other.a);
+// 			intersection.y = a*intersection.x+b;
+// 		}
+
+// 	bool isInsideThis = (abs(intersection.x-mPoint1.x)+abs(intersection.x-mPoint2.x)) <= abs(mPoint1.x-mPoint2.x)+0.01;
+// 	bool isInsideOther = (abs(intersection.x-other.mPoint1.x)+abs(intersection.x-other.mPoint2.x)) <= abs(other.mPoint1.x-other.mPoint2.x)+0.01;
+// 	return isInsideThis && isInsideOther;
+// }

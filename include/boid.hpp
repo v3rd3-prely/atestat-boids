@@ -3,19 +3,24 @@
 #include <SFML/Graphics/ConvexShape.hpp>
 #include "ray.hpp"
 #include "rest.hpp"
-
-class Boid
+#include "showable.hpp"
+class Boid : public Showable
 {
+	sf::Vector2f mPosition, mVelocity, mAcceleration;
+	sf::ConvexShape mShape;
+	Ray mRays[R_MAX];
 public:
-	sf::Vector2f pos, speed, force;
-	sf::ConvexShape shape;
-	Ray rays[R_MAX];
 
 	Boid();
-	void update(float deltaT, float p);
-	void show(sf::RenderWindow &window, bool ray);
-	void contain(int width, int height);
-	void steer(sf::Vector2f dir);
-	void avoid(Wall *walls, unsigned int s);
-	void think(Boid *boids, float s, float c, float a, float p);
+	void update(float deltaT = 0);
+	void updateRays(float perception);
+	void show();
+	void showRays();
+	void wrap();
+	void setPosition(sf::Vector2f position);
+	void setVelocity(sf::Vector2f velocity);
+
+	void steer(sf::Vector2f direction);
+	void avoid(Wall *walls);
+	void flock(Boid *boids, float *params);
 };

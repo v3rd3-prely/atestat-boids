@@ -4,7 +4,7 @@
 class FPS
 {
 	float deltaT;
-	sf::Clock clock;
+	sf::Clock mTimer;
 
 public:
 	FPS();

@@ -1,28 +1,26 @@
 #include "wall.hpp"
-
-Wall::Wall(sf::Vector2f po1, sf::Vector2f po2)
-{
-	p1 = po1;
-	p2 = po2;
-	vertical = p2.x == p1.x;
-	a = (p2.y-p1.y)/(p2.x-p1.x);
-	b = p1.y-a*p1.x;
-	shape.setPointCount(4);
-	shape.setPoint(0, p1);
-	shape.setPoint(1, p2);
-	shape.setPoint(2, p2);
-	shape.setPoint(3, p1);
-	shape.setOutlineThickness(2);
-	shape.setOutlineColor(sf::Color(255, 0, 0, 255));
-}
+#include <cmath>
 
 Wall::Wall()
 {
-	
+	mShape.setFillColor(sf::Color(200, 50, 50));
+	mShape.setOutlineThickness(4);
+	mShape.setOutlineColor(sf::Color(0, 0, 0, 100));
 }
 
-void Wall::show(sf::RenderWindow &window)
+Wall::Wall(sf::Vector2f point1, sf::Vector2f point2)
 {
-	window.draw(shape);
+	*this = Wall();
+	setPoints(point1, point2);
 }
 
+void Wall::setPoints(sf::Vector2f point1, sf::Vector2f point2)
+{
+	Segment::setPoints(point1, point2);
+	roundEdges(3, 5);
+}
+
+void Wall::show()
+{
+	mWindow->draw(mShape);
+}
